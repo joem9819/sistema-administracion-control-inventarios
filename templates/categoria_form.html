@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · Inventario{% endblock %}
+{% block contenido %}
+  <h2>{{ titulo }}</h2>
+  <form method="post" class="formulario">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="nombre">Nombre *</label>
+    <input id="nombre" name="nombre" maxlength="100" required value="{{ categoria.get('nombre', '') }}">
+
+    <label for="descripcion">Descripción</label>
+    <textarea id="descripcion" name="descripcion" maxlength="250" rows="3">{{ categoria.get('descripcion', '') or '' }}</textarea>
+
+    <div class="botones">
+      <button class="boton" type="submit">Guardar</button>
+      <a href="{{ url_for('listar_categorias') }}">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · Inventario{% endblock %}
+{% block contenido %}
+  <h2>{{ titulo }}</h2>
+  <form method="post" class="formulario">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="codigo_barras">Código de barras *</label>
+    <input id="codigo_barras" name="codigo_barras" maxlength="50" required value="{{ producto.get('codigo_barras', '') }}">
+
+    <label for="nombre">Nombre *</label>
+    <input id="nombre" name="nombre" maxlength="150" required value="{{ producto.get('nombre', '') }}">
+
+    <label for="id_categoria">Categoría *</label>
+    <select id="id_categoria" name="id_categoria" required>
+      <option value="">Selecciona una categoría</option>
+      {% for categoria in categorias %}
+        <option value="{{ categoria.id_categoria }}" {% if producto.get('id_categoria')|int == categoria.id_categoria %}selected{% endif %}>
+          {{ categoria.nombre }}{% if not categoria.estado %} (inactiva){% endif %}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label for="descripcion">Descripción</label>
+    <textarea id="descripcion" name="descripcion" maxlength="300" rows="3">{{ producto.get('descripcion', '') or '' }}</textarea>
+
+    <div class="dos-columnas">
+      <div>
+        <label for="marca">Marca</label>
+        <input id="marca" name="marca" maxlength="100" value="{{ producto.get('marca', '') or '' }}">
+      </div>
+      <div>
+        <label for="unidad_medida">Unidad de medida *</label>
+        <input id="unidad_medida" name="unidad_medida" maxlength="30" required value="{{ producto.get('unidad_medida', 'UNIDAD') }}">
+      </div>
+      <div>
+        <label for="precio_compra">Precio de compra *</label>
+        <input id="precio_compra" name="precio_compra" type="number" min="0" step="0.01" required value="{{ producto.get('precio_compra', '0.00') }}">
+      </div>
+      <div>
+        <label for="precio_venta">Precio de venta *</label>
+        <input id="precio_venta" name="precio_venta" type="number" min="0" step="0.01" required value="{{ producto.get('precio_venta', '0.00') }}">
+      </div>
+      <div>
+        <label for="stock_minimo">Stock mínimo *</label>
+        <input id="stock_minimo" name="stock_minimo" type="number" min="0" step="1" required value="{{ producto.get('stock_minimo', 5) }}">
+      </div>
+      <div>
+        <label for="stock_maximo">Stock máximo *</label>
+        <input id="stock_maximo" name="stock_maximo" type="number" min="0" step="1" required value="{{ producto.get('stock_maximo', 100) }}">
+      </div>
+    </div>
+    <p class="ayuda">En un producto nuevo se crea inventario con saldo 0 en cada sucursal activa. Los límites de un producto ya existente son valores predeterminados: cambiar estos campos no modifica los límites de sus sucursales.</p>
+    <div class="botones">
+      <button class="boton" type="submit">Guardar</button>
+      <a href="{{ url_for('listar_productos') }}">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

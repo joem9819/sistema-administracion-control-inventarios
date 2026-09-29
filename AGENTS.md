@@ -14,7 +14,9 @@ Usar estos nombres en documentos del proyecto. No atribuir tareas, aportes, carg
 
 Desarrollar un **prototipo académico local** de aplicación web para controlar el inventario de un supermercado con varias sucursales. Se contemplan productos, existencias por sucursal, compras, ventas, movimientos de kardex, alertas, reportes y usuarios con roles.
 
-La tecnología elegida es Python con Flask para la web y MariaDB de XAMPP como motor de base de datos, administrado mediante phpMyAdmin. Durante el desarrollo Flask sirve la web localmente; Apache de XAMPP no es necesario para ejecutar el código Python. La propuesta técnica incluye SQLAlchemy y PyMySQL. El detalle está en `docs/arquitectura_y_datos.md`.
+La tecnología elegida es Python con Flask para la web y MariaDB de XAMPP como motor de base de datos, administrado mediante phpMyAdmin. En XAMPP Control Panel 3.3.0, el módulo **Apache** usa el puerto `81` y el módulo **MySQL** usa el `3306`; el motor comprobado es MariaDB 10.4.32. El usuario administra `bd_inventario_supermercado` en `http://localhost:81/phpmyadmin/index.php`. Flask sirve el CRUD en `http://127.0.0.1:5000/`; Apache no ejecuta el código Python.
+
+El primer CRUD usa **PyMySQL y consultas SQL parametrizadas directamente**, por sencillez para estudiantes que empiezan con Python. SQLAlchemy quedó como propuesta anterior para una etapa posterior, no como dependencia del código actual.
 
 ## Archivos y estado real
 
@@ -23,9 +25,13 @@ La tecnología elegida es Python con Flask para la web y MariaDB de XAMPP como m
 - `docs/especificacion_funcional.md`: alcance propuesto, roles, reglas de negocio, etapas y criterios de aceptación.
 - `docs/arquitectura_y_datos.md`: arquitectura propuesta y cambios pendientes del DDL.
 - `README.md`: entrada breve al proyecto.
-- `gitignore`: archivo existente sin punto inicial; Git todavía no lo usa como `.gitignore`.
+- `GUIA_INICIO_RAPIDO.md`: pasos de ejecución en Windows y orden de lectura del código para principiantes.
+- `app.py`, `db.py`, `templates/` y `static/`: CRUD web de productos y categorías, más consulta de inventario.
+- `BD/consultas_vistas.sql`: consultas `SELECT` independientes para las cuatro vistas del modelo.
+- `.env.example`: nombres de variables de conexión. El `.env` local contiene la configuración de este equipo y está ignorado por Git.
+- `.gitignore`: copia funcional del archivo original `gitignore`, que se conserva.
 
-Todavía **no hay aplicación web, DDL corregido ni pruebas de ejecución del esquema en este proyecto**. No se encontró un enunciado o rúbrica formal del docente. Tratar los documentos de `docs/` como definición inicial del equipo, ajustable si aparecen requisitos académicos nuevos.
+El **CRUD básico ya funciona** con la base existente: categorías y productos se pueden crear, listar, editar y desactivar; el inventario se consulta sin modificar stock. Se comprobó la lectura de las páginas y una secuencia temporal de crear, editar y desactivar, retirando luego esos registros de prueba. Todavía **no hay DDL corregido, autenticación, permisos por rol, compras ni ventas en la web**. No se encontró un enunciado o rúbrica formal del docente. Tratar los documentos de `docs/` como definición inicial del equipo, ajustable si aparecen requisitos académicos nuevos.
 
 ## Decisiones funcionales actuales
 
@@ -37,16 +43,17 @@ Todavía **no hay aplicación web, DDL corregido ni pruebas de ejecución del es
 
 ## Ajustes pendientes del modelo
 
-Antes de crear la aplicación, preparar una **nueva versión** del DDL sin sobrescribir el archivo original. Revisar especialmente contraseñas en texto plano, importes de ejemplo inconsistentes, número de factura de compra duplicable, límites de descuentos, tasa de impuesto por línea, alerta de stock mínimo y coherencia entre saldos y movimientos. La lista y las cifras concretas están en `docs/arquitectura_y_datos.md`.
+Antes de ampliar la aplicación con autenticación, compras, ventas o cambios de stock, preparar una **nueva versión** del DDL sin sobrescribir el archivo original. Revisar especialmente contraseñas en texto plano, importes de ejemplo inconsistentes, número de factura de compra duplicable, límites de descuentos, tasa de impuesto por línea, alerta de stock mínimo y coherencia entre saldos y movimientos. La lista y las cifras concretas están en `docs/arquitectura_y_datos.md`.
 
-Probar el DDL revisado en una base de pruebas nueva de MariaDB. El usuario `user_python` documentado para otras clases solo tiene acceso confirmado a `db_persons`; crear un usuario específico para esta base cuando se implemente la conexión. Guardar secretos en variables de entorno o `.env` excluido de Git.
+Probar el DDL revisado en una base de pruebas nueva de MariaDB. En este equipo se comprobó que `user_python` puede consultar la base de inventario; el CRUD usa ese usuario local mediante `.env`. Para una etapa posterior, considerar un usuario exclusivo con permisos limitados a esta base. Guardar secretos en variables de entorno o `.env` excluido de Git.
 
 ## Cómo continuar
 
 1. Leer `README.md`, ambos documentos de `docs/` y el DDL antes de cambiar código o datos.
 2. Si aparece el enunciado del docente, contrastarlo con la definición actual y registrar diferencias.
-3. Corregir el esquema y los datos de prueba en archivos nuevos; verificar su ejecución en MariaDB sin afectar otras bases.
-4. Desarrollar por etapas: acceso y catálogos; inventario y kardex; compras y ventas; alertas, reportes y pruebas.
-5. Mantener los archivos del proyecto dentro de esta carpeta, documentar decisiones nuevas y actualizar este `AGENTS.md` cuando cambie el estado real.
+3. Seguir `GUIA_INICIO_RAPIDO.md` para iniciar el CRUD y comprender los módulos actuales antes de ampliar funciones.
+4. Corregir el esquema y los datos de prueba en archivos nuevos; verificar su ejecución en MariaDB sin afectar otras bases.
+5. Desarrollar las siguientes etapas: acceso y permisos; movimientos de inventario y kardex; compras y ventas; alertas y reportes.
+6. Mantener los archivos del proyecto dentro de esta carpeta, documentar decisiones nuevas y actualizar este `AGENTS.md` cuando cambie el estado real.
 
 Redactar principalmente en español, con explicaciones breves y verificables. No inventar requisitos ni resultados de pruebas. Conservar el trabajo previo de los integrantes.

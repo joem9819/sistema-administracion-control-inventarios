@@ -8,9 +8,9 @@ Navegador
    ▼
 Flask (Python, servidor local)
    ├─ rutas y plantillas Jinja
-   ├─ autenticación y permisos
-   ├─ servicios de compras, ventas e inventario
-   └─ SQLAlchemy + PyMySQL
+   ├─ CRUD inicial de categorías y productos
+   ├─ autenticación y operaciones (pendientes)
+   └─ PyMySQL con SQL parametrizado
                  │
                  ▼
          MariaDB de XAMPP
@@ -21,32 +21,26 @@ Flask (Python, servidor local)
 
 Flask ejecutará la web durante el desarrollo en `127.0.0.1:5000` desde PowerShell o la terminal de VS Code. XAMPP iniciará MariaDB y ofrecerá phpMyAdmin; no se desarrollará en PHP. Apache puede permanecer instalado y no se necesita para servir Flask en esta etapa. Esta separación evita mezclar el servidor de desarrollo Python con la administración de la base de datos.
 
-Estructura prevista, aún sin código:
+Estructura actual del primer CRUD:
 
 ```text
 Proyecto_Gestion_Inventario/
-├── app/
-│   ├── __init__.py          # fábrica de Flask
-│   ├── auth/                # acceso y roles
-│   ├── catalogos/
-│   ├── inventario/
-│   ├── operaciones/         # compras y ventas
-│   ├── reportes/
-│   ├── templates/
-│   └── static/
-├── BD/
+├── app.py                   # rutas y validación de formularios
+├── db.py                    # conexión y consultas sencillas
+├── templates/               # páginas HTML
+├── static/                  # estilos
+├── BD/                      # modelo y consultas de vistas
 ├── docs/
-├── tests/
 ├── .env.example
 ├── .gitignore
-└── pyproject.toml
+└── requirements.txt
 ```
 
-Se propone usar plantillas HTML del servidor con CSS sencillo y un poco de JavaScript para formularios dinámicos. SQLAlchemy manejará las consultas y transacciones; PyMySQL permite conectarlo con MariaDB. Se usará un usuario de base de datos propio para `bd_inventario_supermercado`, con permisos solo sobre esa base. El usuario académico `user_python` está configurado para `db_persons`, así que no se asumirá que tiene acceso aquí.
+El primer CRUD usa plantillas HTML del servidor y CSS sencillo. Usa PyMySQL directamente para que cada consulta sea visible y fácil de explicar. Se comprobó en este equipo que `user_python` accede a `bd_inventario_supermercado`; la contraseña se lee de `.env`, ignorado por Git. Cuando se implementen compras y ventas se conservarán operaciones completas dentro de transacciones. SQLAlchemy sigue siendo una opción futura si el proyecto crece, pero no es una dependencia del CRUD actual.
 
 ## 2. Revisión del DDL existente
 
-El archivo `BD/Base_Datos.sql` crea 17 tablas, 4 vistas, datos iniciales y 20 consultas de prueba. Tiene claves foráneas, unicidad de inventario por producto y sucursal y restricciones básicas. Es una base útil para el prototipo, con los siguientes ajustes antes de construir sobre ella.
+El archivo `BD/Base_Datos.sql` crea 17 tablas, 4 vistas, datos iniciales y 20 consultas de prueba. Tiene claves foráneas, unicidad de inventario por producto y sucursal y restricciones básicas. El CRUD inicial usa el esquema existente; antes de ampliar operaciones y seguridad se necesitan los siguientes ajustes.
 
 | Prioridad | Hallazgo | Ajuste propuesto |
 | --- | --- | --- |
@@ -61,7 +55,7 @@ El archivo `BD/Base_Datos.sql` crea 17 tablas, 4 vistas, datos iniciales y 20 co
 | Media | `alertas_inventario` solo se llena durante la carga inicial. | Crear/actualizar alertas al cambiar existencias y cerrar las que dejan de corresponder; evitar duplicados pendientes. |
 | Baja | Stock mínimo y máximo existen en `productos` y en `inventario`. | Mantener los valores del producto como **predeterminados**; el registro de cada sucursal guarda sus límites efectivos. Documentar y mostrar esta diferencia en la interfaz. |
 
-El archivo de exclusiones se llama `gitignore`, sin punto. Al comenzar el código debe quedar como `.gitignore` para que Git ignore `.env`, entornos virtuales y temporales.
+El archivo de exclusiones original se llama `gitignore`, sin punto. Ya se creó una copia funcional `.gitignore` para excluir `.env`, entornos virtuales y temporales; se conservó el archivo original.
 
 ## 3. Cambios de esquema sugeridos
 
@@ -107,8 +101,7 @@ No se propone un disparador que cambie el inventario: la operación de negocio d
 
 - [Flask: fábrica de aplicación y organización](https://flask.palletsprojects.com/en/stable/tutorial/factory/)
 - [Flask: módulos mediante blueprints](https://flask.palletsprojects.com/en/stable/blueprints/)
-- [SQLAlchemy: conexión con MySQL/MariaDB](https://docs.sqlalchemy.org/en/20/dialects/mysql.html)
-- [SQLAlchemy: transacciones](https://docs.sqlalchemy.org/en/20/tutorial/dbapi_transactions.html)
+- [PyMySQL: conexión y consultas parametrizadas](https://pymysql.readthedocs.io/en/latest/user/examples.html)
 - [MariaDB: bloqueo `FOR UPDATE`](https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/selecting-data/for-update)
 - [Werkzeug: hash de contraseñas](https://werkzeug.palletsprojects.com/en/stable/utils/)
 - [Apache Friends: MariaDB en XAMPP](https://www.apachefriends.org/faq_windows)

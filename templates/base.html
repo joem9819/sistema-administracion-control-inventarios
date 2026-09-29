@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Inventario del supermercado{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Inventario del supermercado</h1>
+    <nav aria-label="Navegación principal">
+      <a href="{{ url_for('listar_productos') }}">Productos</a>
+      <a href="{{ url_for('listar_categorias') }}">Categorías</a>
+      <a href="{{ url_for('ver_inventario') }}">Inventario</a>
+    </nav>
+  </header>
+  <main>
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+      {% for tipo, mensaje in mensajes %}
+        <p class="aviso {{ tipo }}" role="alert">{{ mensaje }}</p>
+      {% endfor %}
+    {% endwith %}
+    {% block contenido %}{% endblock %}
+  </main>
+  <footer>Proyecto académico del ITM · Datos locales de prueba</footer>
+</body>
+</html>

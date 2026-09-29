@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Inventario · Supermercado{% endblock %}
+{% block contenido %}
+  <h2>Inventario por sucursal</h2>
+  <p>Esta pantalla consulta la vista <code>vw_inventario_general</code>. El saldo no se edita aquí.</p>
+  <div class="tabla-contenedor">
+    <table>
+      <thead><tr><th>Sucursal</th><th>Producto</th><th>Categoría</th><th>Saldo</th><th>Mínimo</th><th>Máximo</th><th>Situación</th></tr></thead>
+      <tbody>
+        {% for fila in filas %}
+          <tr>
+            <td>{{ fila.sucursal }}</td>
+            <td>{{ fila.producto }}</td>
+            <td>{{ fila.categoria }}</td>
+            <td>{{ fila.stock_actual }}</td>
+            <td>{{ fila.stock_minimo }}</td>
+            <td>{{ fila.stock_maximo }}</td>
+            <td>{{ fila.estado_inventario }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7">No hay registros de inventario.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
