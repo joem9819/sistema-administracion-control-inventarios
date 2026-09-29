@@ -20,6 +20,7 @@ from flask import (
 from db import conectar, consultar, consultar_uno, guardar
 
 
+# Carga los datos de conexión del .env local antes de abrir MariaDB.
 load_dotenv()
 app = Flask(__name__)
 # En .env se puede fijar una clave para conservar la sesión entre reinicios.
@@ -28,7 +29,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY") or secrets.token_hex(32)
 
 @app.context_processor
 def incluir_token():
-    """Pone un token en cada formulario que modifica datos."""
+    """Pone un código de seguridad en los formularios que guardan cambios."""
 
     def csrf_token():
         if "csrf_token" not in session:
@@ -40,6 +41,7 @@ def incluir_token():
 
 @app.before_request
 def revisar_token():
+    # Solo los POST cambian datos; se comprueba que vengan de un formulario nuestro.
     if request.method == "POST":
         esperado = session.get("csrf_token", "")
         recibido = request.form.get("csrf_token", "")
@@ -82,6 +84,7 @@ def leer_categoria(formulario):
 
 @app.route("/categorias/nueva", methods=["GET", "POST"])
 def crear_categoria():
+    # GET muestra el formulario; POST recibe los datos al pulsar «Guardar».
     if request.method == "POST":
         try:
             nombre, descripcion = leer_categoria(request.form)
@@ -132,6 +135,7 @@ def cambiar_estado_categoria(id_categoria):
     if categoria is None:
         abort(404)
     if categoria["estado"] == 1:
+        # Se conserva la categoría si todavía tiene productos activos.
         activos = consultar_uno(
             "SELECT COUNT(*) AS total FROM productos "
             "WHERE id_categoria = %s AND estado = 1",
@@ -153,6 +157,7 @@ def cambiar_estado_categoria(id_categoria):
 
 
 def categorias_disponibles(id_actual=None):
+    """Muestra categorías activas y, al editar, la categoría actual."""
     return consultar(
         "SELECT id_categoria, nombre, estado FROM categorias "
         "WHERE estado = 1 OR id_categoria = %s ORDER BY nombre",
@@ -161,6 +166,7 @@ def categorias_disponibles(id_actual=None):
 
 
 def leer_decimal(formulario, campo):
+    """Lee un precio sin usar float, que puede introducir errores de redondeo."""
     try:
         valor = Decimal(formulario.get(campo, ""))
     except InvalidOperation as error:
@@ -181,6 +187,7 @@ def leer_producto(formulario):
         "marca": formulario.get("marca", "").strip(),
         "unidad_medida": formulario.get("unidad_medida", "UNIDAD").strip().upper(),
     }
+    # Las longitudes deben caber en las columnas VARCHAR de productos.
     limites = {"codigo_barras": 50, "nombre": 150, "descripcion": 300,
                "marca": 100, "unidad_medida": 30}
     for campo, limite in limites.items():
@@ -224,6 +231,7 @@ def crear_producto():
             datos = leer_producto(request.form)
             if not any(c["id_categoria"] == datos["id_categoria"] for c in categorias):
                 raise ValueError("Selecciona una categoría activa.")
+            # Producto e inventario inicial deben guardarse juntos.
             with conectar() as conexion:
                 try:
                     with conexion.cursor() as cursor:
@@ -237,6 +245,7 @@ def crear_producto():
                              datos["precio_compra"], datos["precio_venta"],
                              datos["stock_minimo"], datos["stock_maximo"]),
                         )
+                        # MariaDB asigna este ID; se usa para relacionar el inventario.
                         id_producto = cursor.lastrowid
                         # Cada sucursal activa empieza con 0 unidades del producto nuevo.
                         cursor.execute(
@@ -245,8 +254,10 @@ def crear_producto():
                             "SELECT %s, id_sucursal, 0, %s, %s FROM sucursales WHERE estado = 1",
                             (id_producto, datos["stock_minimo"], datos["stock_maximo"]),
                         )
+                    # Confirma las dos inserciones solo cuando ambas terminan bien.
                     conexion.commit()
                 except Exception:
+                    # Si una falla, no queda un producto creado a medias.
                     conexion.rollback()
                     raise
             flash("Producto creado con inventario inicial en cero.", "ok")
@@ -298,6 +309,7 @@ def cambiar_estado_producto(id_producto):
     if producto is None:
         abort(404)
     if producto["estado"] == 1:
+        # «Eliminar» desactiva el producto, pero primero exige saldo cero.
         saldo = consultar_uno(
             "SELECT COALESCE(SUM(stock_actual), 0) AS total "
             "FROM inventario WHERE id_producto = %s",

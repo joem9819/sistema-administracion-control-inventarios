@@ -15,6 +15,7 @@ def conectar():
         password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_NAME", "bd_inventario_supermercado"),
         charset="utf8mb4",
+        # Cada fila se recibe como {"nombre_columna": valor}, fácil de leer.
         cursorclass=DictCursor,
         connect_timeout=5,
     )
@@ -22,8 +23,10 @@ def conectar():
 
 def consultar(sql, valores=()):
     """Ejecuta un SELECT y devuelve sus filas como diccionarios."""
+    # Los bloques with cierran el cursor y la conexión al salir.
     with conectar() as conexion:
         with conexion.cursor() as cursor:
+            # Los valores reemplazan los %s de la consulta de forma segura.
             cursor.execute(sql, valores)
             return cursor.fetchall()
 
@@ -42,7 +45,9 @@ def guardar(sql, valores):
         try:
             with conexion.cursor() as cursor:
                 cursor.execute(sql, valores)
+            # Sin commit(), el cambio no queda guardado en MariaDB.
             conexion.commit()
         except Exception:
+            # Si falla la operación, se deshace antes de informar el error.
             conexion.rollback()
             raise
