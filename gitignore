@@ -1,0 +1,110 @@
+# ============================================
+# SISTEMA DE ADMINISTRACIÓN Y CONTROL DE INVENTARIOS
+# .gitignore genérico
+# ============================================
+
+# Variables de entorno / credenciales
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+credentials.json
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+*~
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Java / Maven / Gradle
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+.gradle/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# Node.js / JavaScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+dist/
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+
+# PHP / Composer
+vendor/
+
+# Logs
+*.log
+logs/
+
+# Temporales
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+tmp/
+temp/
+
+# Compilados / generados
+bin/
+obj/
+
+# Bases de datos locales
+*.sqlite
+*.sqlite3
+*.db
+
+# Comprimidos
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Configuración local
+config.local.*
+application-local.properties
+application-local.yml
+application-local.yaml
