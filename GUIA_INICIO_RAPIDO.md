@@ -9,9 +9,9 @@ Esta guía explica cómo abrir el CRUD actual en Windows y en qué orden leer su
 | Aplicación web | Flask, con plantillas Jinja en `templates/` y una hoja de estilos en `static/` |
 | Acceso a datos | `PyMySQL` con consultas SQL escritas a mano y parametrizadas, en `db.py` |
 | Configuración | `python-dotenv` lee el archivo `.env`; las tres dependencias están en `requirements.txt` |
-| Servidor de base de datos | El módulo que XAMPP llama **MySQL**, iniciado en el puerto `3306` |
+| Base de datos | El módulo **MySQL** de XAMPP, en el puerto `3306` |
 
-Sobre el nombre del motor: XAMPP 8.0.30 muestra el módulo como «MySQL», pero el programa que instala es **MariaDB 10.4.32**. Se comprobó ejecutando `C:\xampp\mysql\bin\mysqld.exe --version`. Son dos nombres para el servidor que usa este proyecto, y por eso la documentación los mezcla. El código Python nunca nombra ninguno de los dos: `db.py` solo usa PyMySQL, que habla el protocolo de MySQL y funciona igual contra MariaDB. El archivo `BD/Base_Datos.sql` está encabezado como MySQL 8.0+ y se ejecuta sin cambios sobre MariaDB 10.4.
+El código Python no depende de ningún motor en concreto. `db.py` solo usa PyMySQL, y el DDL de `BD/Base_Datos.sql` está escrito para MySQL 8.0+.
 
 El proyecto **no usa** SQLAlchemy ni ningún ORM, no usa ODBC y no se ejecuta sobre Apache. Apache solo sirve phpMyAdmin.
 

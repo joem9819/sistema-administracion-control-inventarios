@@ -20,7 +20,7 @@ from flask import (
 from db import conectar, consultar, consultar_uno, guardar
 
 
-# Carga los datos de conexión del .env local antes de abrir MariaDB.
+# Carga los datos de conexión del .env local antes de abrir la base.
 load_dotenv()
 app = Flask(__name__)
 # En .env se puede fijar una clave para conservar la sesión entre reinicios.

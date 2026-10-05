@@ -23,7 +23,7 @@
       Gestión de Inventario
     </text>
     <text x="2" y="104" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="21" fill="#99f6e4">
-      Supermercado con varias sucursales · Python · Flask · MariaDB
+      Supermercado con varias sucursales · Python · Flask · MySQL
     </text>
     <text x="2" y="140" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.55" letter-spacing="2.5">
       PROYECTO INTEGRADOR EN SOFTWARE LIBRE · ITM

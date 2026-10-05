@@ -53,7 +53,7 @@ def guardar(sql, valores):
         try:
             with conexion.cursor() as cursor:
                 cursor.execute(sql, valores)
-            # Sin commit(), el cambio no queda guardado en MariaDB.
+            # Sin commit(), el cambio no queda guardado en la base.
             conexion.commit()
         except Exception:
             # Si falla la operación, se deshace antes de informar el error.

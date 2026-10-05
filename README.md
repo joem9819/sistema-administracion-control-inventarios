@@ -6,7 +6,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.1-000000?style=for-the-badge&logo=flask&logoColor=white)
-![MariaDB](https://img.shields.io/badge/MariaDB-10.4-003545?style=for-the-badge&logo=mariadb&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-XAMPP-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![PyMySQL](https://img.shields.io/badge/PyMySQL-1.1-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![XAMPP](https://img.shields.io/badge/XAMPP-8.0-FB7A24?style=for-the-badge&logo=xampp&logoColor=white)
 
@@ -75,4 +75,4 @@ La aplicación queda en **http://127.0.0.1:5000**. Los pasos completos están en
 
 - [Flask: estructura de una aplicación](https://flask.palletsprojects.com/en/stable/tutorial/factory/)
 - [PyMySQL: conexión y consultas](https://pymysql.readthedocs.io/en/latest/user/examples.html)
-- [Apache Friends: MariaDB en XAMPP](https://www.apachefriends.org/faq_windows)
+- [Apache Friends: preguntas frecuentes de XAMPP en Windows](https://www.apachefriends.org/faq_windows)

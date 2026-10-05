@@ -13,13 +13,13 @@ Flask (Python, servidor local)
    └─ PyMySQL con SQL parametrizado
                  │
                  ▼
-         MariaDB de XAMPP
+         MySQL de XAMPP
                  ▲
                  │ administración manual
              phpMyAdmin
 ```
 
-Flask ejecutará la web durante el desarrollo en `127.0.0.1:5000` desde PowerShell o la terminal de VS Code. XAMPP iniciará MariaDB y ofrecerá phpMyAdmin; no se desarrollará en PHP. Apache puede permanecer instalado y no se necesita para servir Flask en esta etapa. Esta separación evita mezclar el servidor de desarrollo Python con la administración de la base de datos.
+Flask ejecutará la web durante el desarrollo en `127.0.0.1:5000` desde PowerShell o la terminal de VS Code. XAMPP iniciará MySQL y ofrecerá phpMyAdmin; no se desarrollará en PHP. Apache puede permanecer instalado y no se necesita para servir Flask en esta etapa. Esta separación evita mezclar el servidor de desarrollo Python con la administración de la base de datos.
 
 Estructura actual del primer CRUD:
 
@@ -95,13 +95,13 @@ No se propone un disparador que cambie el inventario: la operación de negocio d
 - Uso de `Decimal` para dinero y de claves foráneas para conservar relaciones.
 - `estado` para desactivar catálogos sin borrar historial; no borrar compras, ventas ni movimientos desde la interfaz.
 - Pruebas de permisos, integridad de saldos, operaciones repetidas, concurrencia básica y conciliación de importes.
-- Primero ejecutar la versión revisada del esquema en una base de **pruebas nueva** de MariaDB 10.4; comprobar tablas, vistas, restricciones y consultas antes de utilizarla para desarrollo.
+- Primero ejecutar la versión revisada del esquema en una base de **pruebas nueva** de MySQL; comprobar tablas, vistas, restricciones y consultas antes de utilizarla para desarrollo.
 
 ## 5. Fuentes técnicas
 
 - [Flask: fábrica de aplicación y organización](https://flask.palletsprojects.com/en/stable/tutorial/factory/)
 - [Flask: módulos mediante blueprints](https://flask.palletsprojects.com/en/stable/blueprints/)
 - [PyMySQL: conexión y consultas parametrizadas](https://pymysql.readthedocs.io/en/latest/user/examples.html)
-- [MariaDB: bloqueo `FOR UPDATE`](https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/selecting-data/for-update)
+- [MySQL: bloqueo `FOR UPDATE`](https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html)
 - [Werkzeug: hash de contraseñas](https://werkzeug.palletsprojects.com/en/stable/utils/)
-- [Apache Friends: MariaDB en XAMPP](https://www.apachefriends.org/faq_windows)
+- [Apache Friends: preguntas frecuentes de XAMPP en Windows](https://www.apachefriends.org/faq_windows)

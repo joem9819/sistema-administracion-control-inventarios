@@ -72,7 +72,7 @@ La interfaz será adaptable a computador y móvil, en español, con formularios 
 
 | Etapa | Resultado verificable |
 | --- | --- |
-| 0. Modelo | DDL revisado, datos de prueba coherentes y creación comprobada en una base de pruebas de MariaDB |
+| 0. Modelo | DDL revisado, datos de prueba coherentes y creación comprobada en una base de pruebas de MySQL |
 | 1. Base web | Inicio de sesión, roles, estructura de páginas, conexión y catálogos |
 | 2. Inventario | Consulta por sucursal, ajustes con kardex y alertas |
 | 3. Operaciones | Compras y ventas con cambios de stock en transacciones |
@@ -86,7 +86,7 @@ La interfaz será adaptable a computador y móvil, en español, con formularios 
 - Cada cambio de stock queda reflejado en el kardex y coincide con el saldo actual.
 - Los totales de compras y ventas coinciden con los detalles.
 - Los datos y contraseñas de conexión se leen de variables de entorno o `.env` ignorado por Git.
-- El proyecto puede iniciarse en Windows siguiendo un README y usando MariaDB de XAMPP.
+- El proyecto puede iniciarse en Windows siguiendo un README y usando MySQL de XAMPP.
 
 ## 7. Pendientes del enunciado
 
