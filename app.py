@@ -29,11 +29,27 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY") or secrets.token_hex(32)
 
 @app.context_processor
 def incluir_token():
-    """Pone un código de seguridad en los formularios que guardan cambios."""
+    """Entrega a todas las plantillas la función csrf_token().
+
+    El decorador @app.context_processor hace que Flask ejecute esto antes de
+    dibujar cualquier plantilla, y añada lo que devuelve a sus variables. Así
+    no hay que pasar el token en cada render_template().
+
+    Se devuelve la función y no el código ya calculado. De ese modo el token
+    solo se crea cuando una plantilla lo pide; las páginas que únicamente
+    listan datos no abren sesión para nadie. En el HTML se usa con paréntesis:
+    {{ csrf_token() }}.
+    """
 
     def csrf_token():
+        # session es una cookie firmada con app.secret_key: el visitante la
+        # puede leer, pero no puede fabricar una falsa sin esa clave.
         if "csrf_token" not in session:
+            # secrets (no random) genera valores impredecibles, aptos para
+            # seguridad. token_urlsafe(24) da texto aleatorio sin caracteres
+            # raros, cómodo para viajar dentro de un formulario HTML.
             session["csrf_token"] = secrets.token_urlsafe(24)
+        # El mismo visitante conserva su token durante toda la sesión.
         return session["csrf_token"]
 
     return {"csrf_token": csrf_token}
@@ -41,22 +57,39 @@ def incluir_token():
 
 @app.before_request
 def revisar_token():
-    # Solo los POST cambian datos; se comprueba que vengan de un formulario nuestro.
+    """Comprueba el token antes de atender cualquier petición que guarde datos.
+
+    Es la pareja de incluir_token(): una escribe el código en un campo oculto
+    del formulario y esta lo verifica al recibirlo.
+
+    Protege contra CSRF (falsificación de petición entre sitios). Si otra
+    página web tuviera un formulario oculto apuntando a nuestras rutas, el
+    navegador de la víctima enviaría la petición con su cookie de sesión
+    incluida. Esa página ajena puede provocar el envío, pero no puede leer la
+    cookie de nuestro dominio para copiar el token, así que no pasa.
+    """
+    # Solo los POST cambian datos; los GET de este CRUD únicamente consultan.
     if request.method == "POST":
         esperado = session.get("csrf_token", "")
         recibido = request.form.get("csrf_token", "")
+        # compare_digest tarda siempre lo mismo, falle donde falle. Un == normal
+        # se detiene en la primera diferencia y ese tiempo filtra información.
         if not esperado or not secrets.compare_digest(esperado, recibido):
             abort(400, "El formulario venció. Recarga la página e inténtalo de nuevo.")
 
 
+# Red de seguridad: si una consulta falla en cualquier ruta, se atiende aquí.
 @app.errorhandler(pymysql.MySQLError)
 def error_base_datos(error):
-    app.logger.exception("Error de MariaDB: %s", error)
+    # El detalle técnico queda en la consola, no en el navegador del usuario.
+    app.logger.exception("Error de base de datos: %s", error)
+    # 503 significa «servicio no disponible», que es el caso: la base no responde.
     return render_template("error.html"), 503
 
 
 @app.get("/")
 def inicio():
+    # La raíz no tiene pantalla propia; url_for() arma la URL de esa función.
     return redirect(url_for("listar_productos"))
 
 
@@ -73,6 +106,9 @@ def listar_categorias():
 
 
 def leer_categoria(formulario):
+    """Valida el formulario y devuelve los datos limpios, o lanza ValueError."""
+    # strip() quita los espacios sobrantes al inicio y al final.
+    # Se valida aquí aunque el HTML ya lo exija: ese control se puede saltar.
     nombre = formulario.get("nombre", "").strip()
     descripcion = formulario.get("descripcion", "").strip()
     if not nombre or len(nombre) > 100:
@@ -92,15 +128,21 @@ def crear_categoria():
                 "INSERT INTO categorias (nombre, descripcion) VALUES (%s, %s)",
                 (nombre, descripcion),
             )
+            # flash() deja un mensaje que la página siguiente muestra una sola vez.
             flash("Categoría creada correctamente.", "ok")
+            # Se redirige tras guardar; así recargar la página no repite el INSERT.
             return redirect(url_for("listar_categorias"))
         except ValueError as error:
+            # Error de validación nuestro: el texto ya viene listo para el usuario.
             flash(str(error), "error")
         except pymysql.IntegrityError:
+            # La base rechazó el dato por una restricción suya; aquí, nombre UNIQUE.
             flash("Ya existe una categoría con ese nombre.", "error")
+    # Si falló, se devuelve request.form para que no se pierda lo ya escrito.
     return render_template("categoria_form.html", categoria=request.form, titulo="Nueva categoría")
 
 
+# <int:id_categoria> exige que la URL traiga un número y lo pasa como argumento.
 @app.route("/categorias/<int:id_categoria>/editar", methods=["GET", "POST"])
 def editar_categoria(id_categoria):
     categoria = consultar_uno(
@@ -108,6 +150,7 @@ def editar_categoria(id_categoria):
         (id_categoria,),
     )
     if categoria is None:
+        # consultar_uno() devuelve None si no hay fila: se responde «no encontrado».
         abort(404)
     if request.method == "POST":
         try:
@@ -123,6 +166,7 @@ def editar_categoria(id_categoria):
             flash(str(error), "error")
         except pymysql.IntegrityError:
             flash("Ya existe una categoría con ese nombre.", "error")
+        # Tras un error se repinta con lo que el usuario escribió, no con lo guardado.
         categoria = request.form
     return render_template("categoria_form.html", categoria=categoria, titulo="Editar categoría")
 
@@ -144,6 +188,7 @@ def cambiar_estado_categoria(id_categoria):
         if activos["total"] > 0:
             flash("Desactiva primero los productos activos de esta categoría.", "error")
             return redirect(url_for("listar_categorias"))
+    # Invierte el estado: el mismo botón desactiva y vuelve a activar.
     nuevo_estado = 0 if categoria["estado"] == 1 else 1
     guardar(
         "UPDATE categorias SET estado = %s WHERE id_categoria = %s",
@@ -158,6 +203,8 @@ def cambiar_estado_categoria(id_categoria):
 
 def categorias_disponibles(id_actual=None):
     """Muestra categorías activas y, al editar, la categoría actual."""
+    # El OR evita que al editar desaparezca una categoría ya desactivada.
+    # El «or 0» pone un id que no existe cuando se está creando, no editando.
     return consultar(
         "SELECT id_categoria, nombre, estado FROM categorias "
         "WHERE estado = 1 OR id_categoria = %s ORDER BY nombre",
@@ -170,9 +217,12 @@ def leer_decimal(formulario, campo):
     try:
         valor = Decimal(formulario.get(campo, ""))
     except InvalidOperation as error:
+        # «from error» conserva el error original para el registro técnico.
         raise ValueError(f"{campo.replace('_', ' ').capitalize()} debe ser un número.") from error
+    # Decimal acepta textos como "NaN" o "Infinity"; is_finite() los rechaza.
     if not valor.is_finite() or valor < 0 or valor >= 10000000000:
         raise ValueError(f"{campo.replace('_', ' ').capitalize()} debe ser positivo y válido.")
+    # El exponente de un Decimal dice cuántos decimales tiene: -2 son dos cifras.
     if valor.as_tuple().exponent < -2:
         raise ValueError(f"{campo.replace('_', ' ').capitalize()} admite máximo 2 decimales.")
     return valor
@@ -195,12 +245,15 @@ def leer_producto(formulario):
             raise ValueError(f"{campo.replace('_', ' ').capitalize()} es demasiado largo.")
     if not datos["codigo_barras"] or not datos["nombre"] or not datos["unidad_medida"]:
         raise ValueError("Código de barras, nombre y unidad de medida son obligatorios.")
+    # Todo lo que llega de un formulario es texto; int() lo convierte a número.
     try:
         datos["id_categoria"] = int(formulario.get("id_categoria", ""))
         datos["stock_minimo"] = int(formulario.get("stock_minimo", ""))
         datos["stock_maximo"] = int(formulario.get("stock_maximo", ""))
     except ValueError as error:
+        # int() falla con ValueError si el texto no es un entero.
         raise ValueError("Selecciona una categoría y escribe límites de stock enteros.") from error
+    # 2.147.483.647 es el valor máximo que admite una columna INT de la base.
     if (
         datos["stock_minimo"] < 0
         or datos["stock_maximo"] < datos["stock_minimo"]
@@ -214,6 +267,7 @@ def leer_producto(formulario):
 
 @app.get("/productos")
 def listar_productos():
+    # El JOIN trae el nombre de la categoría; productos solo guarda su id.
     productos = consultar(
         "SELECT p.id_producto, p.codigo_barras, p.nombre, p.precio_venta, "
         "p.estado, c.nombre AS categoria FROM productos p "
@@ -229,9 +283,12 @@ def crear_producto():
     if request.method == "POST":
         try:
             datos = leer_producto(request.form)
+            # El desplegable del HTML se puede manipular antes de enviarlo,
+            # así que la categoría se vuelve a comprobar contra la lista real.
             if not any(c["id_categoria"] == datos["id_categoria"] for c in categorias):
                 raise ValueError("Selecciona una categoría activa.")
-            # Producto e inventario inicial deben guardarse juntos.
+            # Producto e inventario inicial deben guardarse juntos: una transacción.
+            # Aquí no se usa guardar() porque son dos consultas en la misma conexión.
             with conectar() as conexion:
                 try:
                     with conexion.cursor() as cursor:
@@ -245,9 +302,11 @@ def crear_producto():
                              datos["precio_compra"], datos["precio_venta"],
                              datos["stock_minimo"], datos["stock_maximo"]),
                         )
-                        # MariaDB asigna este ID; se usa para relacionar el inventario.
+                        # La base asigna sola el id del producto; aquí se recupera
+                        # para poder relacionar las filas de inventario.
                         id_producto = cursor.lastrowid
-                        # Cada sucursal activa empieza con 0 unidades del producto nuevo.
+                        # INSERT ... SELECT crea una fila por sucursal activa en una
+                        # sola consulta, sin recorrer las sucursales desde Python.
                         cursor.execute(
                             "INSERT INTO inventario "
                             "(id_producto, id_sucursal, stock_actual, stock_minimo, stock_maximo) "
@@ -310,6 +369,7 @@ def cambiar_estado_producto(id_producto):
         abort(404)
     if producto["estado"] == 1:
         # «Eliminar» desactiva el producto, pero primero exige saldo cero.
+        # SUM() devuelve NULL si no hay filas; COALESCE lo convierte en 0.
         saldo = consultar_uno(
             "SELECT COALESCE(SUM(stock_actual), 0) AS total "
             "FROM inventario WHERE id_producto = %s",
@@ -339,4 +399,6 @@ def ver_inventario():
 
 
 if __name__ == "__main__":
+    # Esta línea solo corre si se ejecuta «python app.py» directamente.
+    # Es el servidor de desarrollo de Flask: sirve para clase, no para producción.
     app.run(host="127.0.0.1", port=5000, debug=False)
