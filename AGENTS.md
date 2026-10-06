@@ -24,6 +24,7 @@ El primer CRUD usa **PyMySQL y consultas SQL parametrizadas directamente**, por 
 - `BD/Scripts_BD.mwb`: modelo original de MySQL Workbench.
 - `docs/especificacion_funcional.md`: alcance propuesto, roles, reglas de negocio, etapas y criterios de aceptación.
 - `docs/arquitectura_y_datos.md`: arquitectura propuesta y cambios pendientes del DDL.
+- `docs/diseno_capas_componentes.drawio`: dos hojas, el diagrama de capas y componentes del CRUD actual y el diagrama entidad relación de `BD/Base_Datos.sql`; se abre en app.diagrams.net.
 - `README.md`: entrada breve al proyecto.
 - `GUIA_INICIO_RAPIDO.md`: pasos de ejecución en Windows y orden de lectura del código para principiantes.
 - `app.py`, `db.py`, `templates/` y `static/`: CRUD web de productos y categorías, más consulta de inventario.

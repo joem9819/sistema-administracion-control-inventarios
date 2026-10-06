@@ -61,6 +61,7 @@ La aplicación queda en **http://127.0.0.1:5000**. Los pasos completos están en
 | [Guía de inicio rápido](GUIA_INICIO_RAPIDO.md) | Ejecución en Windows y orden de lectura del código |
 | [Especificación funcional](docs/especificacion_funcional.md) | Requisitos, roles y flujos |
 | [Arquitectura y datos](docs/arquitectura_y_datos.md) | Diseño y revisión del modelo |
+| [Diagramas](docs/diseno_capas_componentes.drawio) | Capas y componentes, y entidad relación, en draw.io |
 | [Contexto del proyecto](AGENTS.md) | Estado real y cómo continuar |
 
 ## Notas
