@@ -33,6 +33,12 @@
 | Compras y ventas | 🚧 Pendiente |
 | Movimientos de kardex y alertas | 🚧 Pendiente |
 
+## Capturas
+
+| Catálogo de productos | Inventario por sucursal |
+| :---: | :---: |
+| <img src="assets/captura_productos.png" alt="Catálogo de productos" width="100%"> | <img src="assets/captura_inventario.png" alt="Inventario por sucursal" width="100%"> |
+
 ## Inicio rápido
 
 Inicia **MySQL** en XAMPP y ejecuta:
